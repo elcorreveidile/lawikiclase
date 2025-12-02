@@ -1,0 +1,10 @@
+{
+  "name": "@lawikiclase/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "nest start --watch",
+    "build": "nest build",
+    "lint": "eslint . --ext .ts"
+  }
+}
