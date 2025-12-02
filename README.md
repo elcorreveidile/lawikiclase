@@ -1,6 +1,6 @@
-# La Wikiclase
+# 🎓 La Wikiclase
 
-Arquitectura inicial propuesta para La Wikiclase, un hub que unifica tus sitios y habilita cursos con pagos, autenticación robusta y generación de PDFs.
+Plataforma integral de cursos de **Español como Lengua Extranjera (ELE)**, Literatura y Metodología Educativa. Hub central que unifica 13 proyectos web con sistema de cursos premium, pagos, autenticación robusta y generación de PDFs.
 
 ## Objetivos
 - Landing y catálogo de cursos con alto rendimiento y SEO.
@@ -35,16 +35,98 @@ Arquitectura inicial propuesta para La Wikiclase, un hub que unifica tus sitios 
     architecture.md
 ```
 
-## Próximos pasos
-1. Inicializar Turborepo con pnpm workspaces y configuración de lint/test.
-2. Bootstrap de `apps/web` con Next.js 14, Tailwind y shadcn/ui; rutas: landing, catálogo, detalle de curso, panel de usuario.
-3. Bootstrap de `apps/api` con NestJS + Prisma; módulos: auth (OAuth), users, courses, enrollments, payments (Stripe), pdf.
-4. Definir esquemas Prisma y migraciones iniciales en PostgreSQL.
-5. Integrar Stripe (Checkout) y webhooks de pago; matricular usuarios al confirmar.
-6. Implementar servicio de PDFs y plantillas base (certificado, factura, lección).
-7. Configurar despliegues (Vercel para web, Fly.io/Render para api) y observabilidad.
+## ✅ Estado Actual
 
-## Notas
-- SEO: usar metadata dinámica en Next.js, OpenGraph, sitemap/robots; SSR/SSG para cursos y landing.
-- Agente SEO: se puede integrar más adelante con APIs (ej. HeyGen) para generar contenido audiovisual y respuestas.
-- Moodle: integración a nivel de LTI o sincronización de usuarios/cursos según necesidad.
+- ✅ Turborepo inicializado con pnpm workspaces
+- ✅ Next.js 14 configurado con App Router, TypeScript y Tailwind CSS
+- ✅ NestJS configurado con Fastify, Prisma y estructura modular
+- ✅ Packages compartidos: @lawikiclase/ui, @lawikiclase/config, @lawikiclase/utils
+- ✅ Esquema Prisma completo con todos los modelos
+- ✅ Seed de base de datos con 13 proyectos web
+- ✅ Landing page inicial creada
+
+## 🚀 Inicio Rápido
+
+```bash
+# Instalar dependencias
+pnpm install
+
+# Configurar variables de entorno
+cp apps/web/.env.local.example apps/web/.env.local
+cp apps/api/.env.example apps/api/.env
+
+# Configurar base de datos
+cd apps/api
+pnpm migrate
+pnpm seed
+
+# Ejecutar en modo desarrollo
+cd ../..
+pnpm dev
+```
+
+Visita:
+- 🌐 Frontend: http://localhost:3000
+- 🔧 API: http://localhost:3001
+- 📚 API Docs: http://localhost:3001/api/docs
+
+**📖 Consulta la [Guía de Configuración Completa](./docs/SETUP_GUIDE.md)**
+
+## 🎯 Funcionalidades Principales
+
+### Implementadas
+- ✅ Arquitectura base de monorepo
+- ✅ Sistema de componentes UI compartidos
+- ✅ Estructura modular de backend
+- ✅ Modelos de datos completos
+
+### En Desarrollo
+- 🔜 Autenticación con Clerk
+- 🔜 Sistema de cursos y lecciones
+- 🔜 Integración de pagos con Stripe
+- 🔜 Generación de PDFs (certificados, facturas)
+- 🔜 Hub de integración de 13 webs
+- 🔜 Chatbot IA en tiempo real
+- 🔜 Generación de videos con HeyGen
+
+## 🏗️ Próximos Pasos
+
+1. Integrar Clerk para autenticación segura
+2. Crear páginas de catálogo y detalle de cursos
+3. Implementar sistema de pagos con Stripe
+4. Desarrollar generación de PDFs profesionales
+5. Crear sección de proyectos web integrados
+6. Implementar chatbot IA con OpenAI
+7. Integrar HeyGen para videos de presentación
+
+## 🌐 13 Proyectos Web Integrados
+
+1. **Curso Intensivo de Español** - Curso de un mes
+2. **Producción e Interacción Oral** - Curso de tres meses
+3. **Literatura hasta el XVIII** - Historia de la literatura española
+4. **UGT CLM Granada** - Sindicato
+5. **La Wikiclase (antigua)** - Versión anterior
+6. **Clases por Zoom - Moodle** - Plataforma LMS actual
+7. **BlaBlaEle** - Escuela de idiomas
+8. **Clínica Lingüística y Cultural** - Proyecto metodológico
+9. **Juan Blas Láinez** - Web personal
+10. **Juan Blas Láinez Blog** - Blog personal
+11. **CEELEEME** - Recursos ELE
+12. **De Tapas por Granada** - Webquest educativa
+13. **Olvidos de Granada** - Revista cultural
+
+## 📚 Documentación
+
+- [Guía de Configuración](./docs/SETUP_GUIDE.md) - Instrucciones detalladas de setup
+- [Arquitectura](./docs/architecture.md) - Decisiones técnicas y componentes
+
+## 🛠️ Tecnologías
+
+**Frontend**: Next.js 14, React 18, TypeScript, Tailwind CSS, Clerk, Stripe
+**Backend**: NestJS, Fastify, Prisma, PostgreSQL, Puppeteer, Bull, Redis
+**Deployment**: Vercel (frontend), Fly.io/Render (backend)
+**AI/ML**: OpenAI GPT-4, HeyGen
+
+## 📄 Licencia
+
+Proyecto privado de Juan Blas Láinez - Todos los derechos reservados
