@@ -1,0 +1,246 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  INSTRUCTOR
+  STUDENT
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum EnrollmentStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  clerkId       String   @unique // Clerk user ID
+  email         String   @unique
+  firstName     String?
+  lastName      String?
+  imageUrl      String?
+  role          Role     @default(STUDENT)
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  coursesCreated Course[]      @relation("CourseInstructor")
+  enrollments    Enrollment[]
+  analytics      Analytics[]
+
+  @@index([email])
+  @@index([clerkId])
+}
+
+model Course {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  title           String
+  description     String        @db.Text
+  shortDescription String?      @db.Text
+  imageUrl        String?
+  price           Decimal       @db.Decimal(10, 2)
+  currency        String        @default("EUR")
+  status          CourseStatus  @default(DRAFT)
+
+  // Instructor
+  instructorId    String
+  instructor      User          @relation("CourseInstructor", fields: [instructorId], references: [id])
+
+  // SEO
+  metaTitle       String?
+  metaDescription String?       @db.Text
+  keywords        String[]      @default([])
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  publishedAt     DateTime?
+
+  // Relations
+  lessons         Lesson[]
+  enrollments     Enrollment[]
+  resources       CourseResource[]
+
+  @@index([slug])
+  @@index([instructorId])
+  @@index([status])
+}
+
+model Lesson {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  title       String
+  content     String   @db.Text // Rich text HTML content
+  videoUrl    String?
+  duration    Int?     // Duration in minutes
+  order       Int      // Order within the course
+
+  isPreview   Boolean  @default(false) // Free preview lesson
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  progress    LessonProgress[]
+
+  @@index([courseId])
+  @@index([order])
+}
+
+model CourseResource {
+  id          String   @id @default(cuid())
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  name        String
+  type        String   // pdf, video, link, etc.
+  url         String
+  size        Int?     // Size in bytes
+
+  createdAt   DateTime @default(now())
+
+  @@index([courseId])
+}
+
+model Enrollment {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id])
+  courseId    String
+  course      Course            @relation(fields: [courseId], references: [id])
+
+  status      EnrollmentStatus  @default(PENDING)
+  progress    Int               @default(0) // Progress percentage
+
+  enrolledAt  DateTime          @default(now())
+  completedAt DateTime?
+  updatedAt   DateTime          @updatedAt
+
+  // Relations
+  payment     Payment?
+  certificate Certificate?
+  lessonProgress LessonProgress[]
+
+  @@unique([userId, courseId])
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+}
+
+model LessonProgress {
+  id            String     @id @default(cuid())
+  enrollmentId  String
+  enrollment    Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  lessonId      String
+  lesson        Lesson     @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  completed     Boolean    @default(false)
+  completedAt   DateTime?
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@unique([enrollmentId, lessonId])
+  @@index([enrollmentId])
+  @@index([lessonId])
+}
+
+model Payment {
+  id                  String        @id @default(cuid())
+  enrollmentId        String        @unique
+  enrollment          Enrollment    @relation(fields: [enrollmentId], references: [id])
+
+  stripeSessionId     String?       @unique
+  stripePaymentIntentId String?     @unique
+
+  amount              Decimal       @db.Decimal(10, 2)
+  currency            String        @default("EUR")
+  status              PaymentStatus @default(PENDING)
+
+  invoiceUrl          String?       // PDF invoice URL
+  receiptUrl          String?       // Stripe receipt URL
+
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  paidAt              DateTime?
+
+  @@index([stripeSessionId])
+  @@index([status])
+}
+
+model Certificate {
+  id            String     @id @default(cuid())
+  enrollmentId  String     @unique
+  enrollment    Enrollment @relation(fields: [enrollmentId], references: [id])
+
+  certificateNumber String   @unique
+  pdfUrl        String
+
+  issuedAt      DateTime   @default(now())
+
+  @@index([certificateNumber])
+}
+
+model Analytics {
+  id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+
+  event       String   // page_view, course_view, video_play, etc.
+  page        String?
+  courseId    String?
+  metadata    Json?    // Additional event data
+
+  userAgent   String?
+  ipAddress   String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([event])
+  @@index([createdAt])
+}
+
+model WebProject {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @db.Text
+  url         String
+  category    String   // education, culture, poetry, ai, etc.
+  imageUrl    String?
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([category])
+  @@index([order])
+}
